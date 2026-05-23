@@ -1,0 +1,4 @@
+streamlit>=1.40
+anthropic>=0.100        # 需支持 messages.create(output_config=…) 结构化输出
+python-dotenv>=1.0
+faster-whisper>=1.0      # C 语音转写（本地）。默认 medium 模型(~1.5GB,首次下载)；WHISPER_MODEL 可换 small/large-v3；没装则降级打字

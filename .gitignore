@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# 密钥与运行时数据（绝不提交）
+.env
+.streamlit/secrets.toml
+data/
+*.db
+
+# 本机专属 Claude 配置（含本地路径/权限，不入库）
+.claude/settings.local.json
+
+# 编辑器 / 系统
+.idea/
+.DS_Store
