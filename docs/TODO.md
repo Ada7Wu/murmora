@@ -73,6 +73,7 @@
 - **真实 AI(B) + 语音(C) 已接**，且 B 有**三后端**：① `ANTHROPIC_API_KEY` 直连 API（可部署）；② 本机已登录 Claude Code → `claude -p` **复用订阅 OAuth（免 key，仅本地）**；③ demo 兜底。语音需装 `faster-whisper`（没装自动降级打字）。仍待：D 降落语音 TTS、E 落库/反馈、晨间层。
 - **免 key(cli) 后端的边界**：只在装了并登录了 Claude Code 的本机有效（**部署到 Streamlit Cloud 不可用**）；比直连 API 慢（子进程+agent 开销）；**用个人订阅给 app 供能受 Anthropic 用量政策约束，仅作黑客松本地演示，勿对外分发**。实现要点：`--system-prompt` 替换人格、`--tools ""` 禁工具、临时 cwd；**切勿加 --bare**（会禁 OAuth）。
 - 提示词目前较短，**prompt caching 暂不触发**（不报错，知识库变长后自动生效）。
-- `data/mistery.db` 是运行时数据，已 gitignore，不要提交。
+- **代码已上 GitHub**：`git@github.com:Ada7Wu/murmora.git`（分支 `main`，走 SSH）。日常 `git add -A && git commit && git push` 即可。
+- `data/mistery.db` 是运行时数据，已 gitignore，不要提交。**⚠️ 代价**：它不会同步到 GitHub，**没有云备份**；换机器时需手动拷贝 `data/` 才能保留历史日志。`.env`、`.claude/settings.local.json` 同理（已忽略，含密钥/本机配置）。
 - 运行命令：根目录执行 `streamlit run src/app.py`（`.streamlit/` 配置留在根目录才生效）。
 - 重动效（水波/渐暗/转场/音频同步）在 Streamlit 上是近似实现；要高保真请评估升级路线（见 A）。
