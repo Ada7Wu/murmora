@@ -1,38 +1,149 @@
-# Mistery 🌙
+# Murmora 秘落之地 🌌
 
-睡前思绪接住器 —— 为成人 ADHD 设计。详见 [CLAUDE.md](./CLAUDE.md)。
+> 让每一个停不下来的念头，都有地方降落。
+> *Let every thought find a place to land.*
 
-## 跑起来（30 秒）
+**Murmora** 是为**成人 ADHD** 设计的「睡前思绪降落器」。睡前大脑停不下来——任务、担忧、情绪、灵感一团乱——越想睡越清醒。Murmora 用**语音或文字**接住这些碎念，帮你**梳理、归类、看见**，再用一段**低刺激的感官降落**把注意力从「想」交还给身体，让你确认：*今晚已经被保存，可以安心入睡。*
+
+它不做又一个更强的计划表，也不陪你聊到深夜——只把你「坠落前的小事」接住。
+
+---
+
+## 🎬 产品生命流程
+
+一条完整的睡前闭环：**记录 → 梳理 → 看见 → 降落 → 反馈**，落成八屏：
+
+```
+① 启动        ② 降落岛        ③ 倾倒          ④ AI 归位        ⑤ 输出
+  深绿冷雾  →  感性 / 理性  →  语音/打字     →  六类线程识别  →  思维导图 ⇄ 夜间日志
+  自动进入     双通道选择      把脑内一切倒出    逐行「接住了…」    + 明日第一步 + 似曾相识
+
+         ⑥ 评分              ⑦ 封存            ⑧ 降落
+      「贴近你了吗」  →   「今晚已被池塘收下」  →  呼吸圈 + 降落音 loop
+       沉入池底·落库         过渡动画              → 渐暗熄屏 → 晚安
+```
+
+| 环节 | 屏 | 做了什么 |
+| --- | --- | --- |
+| **记录** | ③ 倾倒 | 语音（本地转写）或打字，随手倒出睡前杂念，低门槛、不评判 |
+| **梳理** | ④ AI 归位 | LLM 把乱麻拆成**六类线程**（任务/情绪/灵感/担忧/回忆/小电影），逐行浮现的整理仪式 |
+| **看见** | ⑤ 输出 | **理性→思维导图**；**感性→「今夜封存」四段**（你说了什么 · 抚慰疗愈 · 明日第一步 · 睡前落点）。命中过往会轻轻「似曾相识」 |
+| **降落** | ⑦⑧ | 封存今晚 → 4-1-6 呼吸圈 + 循环降落音 + 屏幕渐暗 → 「晚安」熄屏 |
+| **反馈** | ⑥ | 「这次整理贴近你了吗」→ 沉入池底落库，下一夜更懂你 |
+
+> 设计红线（来自故事，贯穿每一句文案）：**永远温柔、不羞辱不施压**；**奖励「开始」而非只奖励「完成」**（明日第一步小到不可能失败）；**异步、低负担、尊重隐私**。
+
+---
+
+## 🧱 技术栈
+
+纯 Python、最省力的「保底先跑通」路线，Python 3.13。
+
+| 层 | 选型 | 说明 |
+| --- | --- | --- |
+| **形态 / 前端** | **Streamlit** | 单文件响应式 Web，移动浏览器自适应；暗色冷雾主题（`.streamlit/` + 内联 CSS） |
+| **AI 整理** | **Anthropic SDK** · `claude-opus-4-7` | 一次 `output_config` **结构化输出**拿全（六类线程 + 双视图 + 四段日志 + 明日第一步）；system 挂 prompt caching |
+| ↳ 后端择优 | api → cli → demo | ① `ANTHROPIC_API_KEY` 直连；② 复用本机 Claude Code 订阅 OAuth（`claude -p`，**免 key**）；③ demo 兜底，出错永不崩 |
+| **语音转写** | **faster-whisper**（本地） | `st.audio_input` 录音 → 本地转写，离线零 key、隐私最好；没装自动降级打字 |
+| **降落音** | `src/focus_audio.py` | `assets/` 有音频文件就用，否则 **numpy 合成**「颂钵 + 稀疏水滴」兜底；PyAV 用于离线把真实素材处理成安静稀疏版 |
+| **存储** | **SQLite**（`src/db.py`） | `entries / threads / ratings` 三表，本地一个文件；`recall_similar()` 做记忆召回 |
+| **配置** | python-dotenv | `.env` 放 key（不入库） |
+
+---
+
+## ✨ 已支持
+
+- 📱 **移动端适配**：响应式（手机优先布局）+ 浏览器「**添加到主屏幕**」→ 全屏类 App 体验
+- 🌫️ **暗色冷雾视觉**（v4 晨露胶片）：松墨/远山青/苔绿/sage/晨陶米语义色 token + Lora/Raleway 字体 + 漂浮晨雾 + 池塘倒影/涟漪
+- ♿ **无障碍**：正文对比 ≥4.5:1、`:focus-visible` 焦点环、`prefers-reduced-motion` 关装饰动画
+- 🪶 **双通道**：感性（夜间日志）/ 理性（思维导图），一键互切
+- 🤖 **真实 AI · 三后端自动择优**（含**免 key** 复用 Claude Code 订阅）+ demo 兜底，无网也能演示
+- 🎙️ **本地隐私语音**：faster-whisper 离线转写（默认 medium，普通话优化）
+- 📝 **感性日志四段**：抚慰疗愈（点出你在承担的身份）+ 睡前落点（可引**公版**文学并标来源，结尾「今晚已经被保存」）
+- 🌧️ **降落音**：真实音频文件或合成兜底，循环轻放，配 4-1-6 呼吸圈 + 渐暗熄屏
+- 🔁 **反馈训练 + 似曾相识**：评分落库；下一夜命中过往线程会轻轻「记得你」
+- 🔒 **隐私本地**：思绪 / 日志 / 录音全在本地（SQLite + 本地 Whisper），`data/`、`.env` 不入库、不上云
+
+---
+
+## 🚀 跑起来（30 秒）
 
 ```bash
 pip install -r requirements.txt
-streamlit run src/app.py        # 在项目根目录执行
+streamlit run src/app.py          # 务必在项目根目录执行（.streamlit/ 主题才生效）
 ```
 
-浏览器会自动打开。**没配 key 也能跑**（演示模式，直接看 UI）。
+浏览器自动打开 `http://localhost:8501`。**没配 key 也能跑**（demo 数据走完八屏）。
 
-接真实 AI：
+接真实 AI（任选其一）：
+
 ```bash
-cp .env.example .env      # 然后把 ANTHROPIC_API_KEY 填进去
+# 方式一：直连 API（最快、可部署）
+cp .env.example .env              # 填入 ANTHROPIC_API_KEY
+
+# 方式二：免 key，复用本机 Claude Code 订阅（仅本地）
+claude /login                     # 登录后不填 key，「开始生成」会自动走 claude -p
 ```
 
-## 在手机上看
+可选增强：
 
-电脑和手机连同一 WiFi，手机浏览器打开 `http://<电脑局域网IP>:8501`
-（Mac 查 IP：`ipconfig getifaddr en0`）。在手机浏览器里「添加到主屏幕」就像 App。
-
-## 目录（代码与方案隔离，详见 [CLAUDE.md](./CLAUDE.md) 的「项目管理体系」）
-
-```
-src/            # 代码：app.py / pipeline.py / db.py / prompts/
-docs/           # 方案：TODO.md · CHANGELOG.md · source/(原始材料) · design/(各版本方案)
-assets/         # 助眠音（可选）
-data/           # 运行时 SQLite（不提交）
-.streamlit/     # 暗色主题
+```bash
+pip install faster-whisper        # 语音转写（首次下模型 ~1.5GB，离线零 key；没装则打字）
+# 降落音：把任意 CC0 音频放成 assets/landing.mp3（或 bowl/water/rain.* 等）即自动优先用
 ```
 
-## 进度
+**手机访问**（同一 WiFi）：手机浏览器开 `http://<电脑局域网IP>:8501`（Mac 查 IP：`ipconfig getifaddr en0`）→「添加到主屏幕」。
+> ⚠️ 手机走局域网 `http` 录不了音（浏览器需安全上下文）→ 用打字；电脑 localhost 可录。
 
-当前 = **v1 / P0 保底**（打字 → 拆解 → 收束 + 呼吸 + 助眠音占位）。
-- 给同事看的完整说明：[docs/开发文档-v1.md](./docs/开发文档-v1.md)
-- 还没做的：[docs/TODO.md](./docs/TODO.md) ｜ 演进记录：[docs/CHANGELOG.md](./docs/CHANGELOG.md)
+---
+
+## 📁 项目结构
+
+代码（机器跑的）与方案（人读的）彻底隔离，详见 [CLAUDE.md](./CLAUDE.md)。
+
+```
+heronix/
+├── src/                  # 代码
+│   ├── app.py            # Streamlit 八屏主入口
+│   ├── pipeline.py       # 真实 AI 管线（三后端 + 结构化输出 + 记忆召回拼接）
+│   ├── db.py             # SQLite：entries/threads/ratings + recall_similar
+│   ├── focus_audio.py    # 降落音：文件优先 / numpy 合成兜底
+│   ├── stt.py            # 本地语音转写（faster-whisper）
+│   ├── tts.py            # 旧 say 朗读（历史/退路，已不在降落屏调用）
+│   └── prompts/murmora.txt  # 红线语气 + 四段结构（与代码强耦合）
+├── docs/                 # 方案（不含代码）
+│   ├── TODO.md · CHANGELOG.md   # 唯一待办源 / 演进记录
+│   ├── design/           # 各版本设计：v2 降落之选 · v3 森林池塘 · v4 晨露胶片
+│   └── source/           # 赛题原始材料（只读）
+├── assets/               # 降落音 + 品牌 logo
+├── data/                 # 运行时 SQLite（不提交，无云备份）
+└── .streamlit/           # 暗色主题
+```
+
+---
+
+## 🛠️ 可优化 / TODO
+
+完整清单见 [docs/TODO.md](./docs/TODO.md)，重点：
+
+- 📲 **真正的 PWA**：manifest + 多尺寸图标 + service worker 离线（现仅响应式 + 加主屏幕）
+- ☁️ **部署 Streamlit Cloud**：公网网址、手机扫码即开、key 放 Secrets
+- ⏸️ **倾倒 30s 静默保护**：「够了吗？我帮你整理一下」
+- 🎚️ **降落音打磨**：循环淡入淡出、音量自适应、随呼吸圈同步
+- 📱 **手机录音**：需 HTTPS（Cloudflare/ngrok 隧道，或语音备忘录上传兜底）
+- 🌅 **晨间层**：仅 6:00–12:00 出现的「昨夜回顾」+ 记忆沉淀
+- 🩸 **激素周期关怀**：经期前夕对夜间冲动/美化倾向更柔的提示
+- 🧠 **夜间认知扭曲检验**：对「乐观偏差/泡沫念头」温和提示
+- 🔎 **记忆召回升级**：关键词匹配 → 按相关度 / embedding
+- 🎞️ **高保真动效**：若动画/语音吃力，评估 FastAPI + 单页 HTML(PWA) + Web Speech API 升级路线
+
+---
+
+## 📜 它来自哪个故事
+
+故事赛道 ·「日常掉线的人 · 成人 ADHD」。主角反复「开始失败」、陷入羞耻循环，深夜反而过度专注。核心洞察：
+
+> 「我缺的不是更强的计划表，是一个能在我**开始不了的时候，把我从第一步接起来**的东西。」
+> 「如果一个人每次失败都发生在『开始之前』，产品是不是不该只奖励他『完成以后』？」
+
+完整背景与设计宪法见 [CLAUDE.md](./CLAUDE.md)；运行/使用细节见技能 `.claude/skills/run-mistery/SKILL.md`。

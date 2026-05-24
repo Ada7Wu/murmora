@@ -74,8 +74,8 @@ LANDING_SCRIPT = [
 
 @st.cache_data(show_spinner=False)
 def landing_audio():
-    """降落屏的 ADHD 舒缓环境声（D′）：assets/ 里有 CC0 音频（landing/drip/water…）就用它，
-    否则用 numpy 合成的「很安静的水滴声」兜底（见 src/focus_audio.py）。取代 v2.2 的 macOS say 朗读——
+    """降落屏的 ADHD 舒缓环境声（D′）：assets/ 里有 CC0 音频（landing/bowl/drip/water…）就用它，
+    否则用 numpy 合成的「很安静的颂钵 + 稀疏水滴」兜底（见 src/focus_audio.py）。取代 v2.2 的 macOS say 朗读——
     睡前不再有人「说话」，只留低刺激、可循环的环境声，让注意力从「想」落到「听」。
     返回 (data_or_path, mime, source)；缓存一次，避免每次 rerun 重算合成。"""
     return focus_audio.get()
@@ -591,8 +591,8 @@ elif st.session_state.screen == "landing":
         # 降落音（D′）：ADHD 舒缓环境声替代朗读——循环轻放、自动播放，随呼吸圈把注意力从「想」落到「听」。
         data, mime, _src = landing_audio()
         st.audio(data, format=mime, autoplay=True, loop=True)
-        if _src == "synth":   # 合成的是很安静的水滴声
-            st.markdown("<div class='hint'>· 很轻的水滴声，跟着它慢慢沉下去 ·</div>",
+        if _src == "synth":   # 合成的是很安静的颂钵 + 稀疏水滴
+            st.markdown("<div class='hint'>· 很轻的颂钵与水滴，跟着它慢慢沉下去 ·</div>",
                         unsafe_allow_html=True)
         st.write("")
         for line in LANDING_SCRIPT:
