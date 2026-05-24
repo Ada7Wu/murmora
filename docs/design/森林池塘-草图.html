@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murmora · 森林池塘 草图</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     Murmora 视觉草图 v3「森林池塘」
+     纪念碑谷几何松林 + 一整片倒映森林的池塘 + 暖萤火(amber)
+     —— 取代旧版「月夜深湖」(月亮/星星/极光)。无塔。纯静态，无依赖。
+     ============================================================ */
+  :root{
+    --bg-top:#163a2b; --bg-bottom:#0e2a1f;
+    --mist:#b7e4c7;
+    --f-light:#74c69d; --f-mid:#40916c; --f-dark:#2d6a4a; --f-deep:#1b4332;
+    --water:#16402f; --water-edge:#1a4a37;
+    --accent:#e9c46a;            /* 唯一暖色：萤火 */
+    --text:#eaf6ef; --muted:#a9d3bd;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:#04100a; font-family:'Quicksand',system-ui,sans-serif; padding:24px;
+    gap:34px; flex-wrap:wrap;
+  }
+
+  /* —— 手机画框：上为夜林天空，下半渐入池水 —— */
+  .phone{
+    position:relative; width:390px; height:760px; border-radius:34px; overflow:hidden;
+    background:linear-gradient(to bottom,
+        var(--bg-top) 0%, #18402f 28%, #1a4836 46%,
+        var(--water-edge) 60%, var(--water) 78%, #11362800 100%),
+      linear-gradient(to bottom, #1a4634, #0e2a1f);
+    box-shadow:0 24px 80px rgba(0,0,0,.6), inset 0 0 60px rgba(0,0,0,.4);
+  }
+
+  /* —— 顶部天光雾（替代月晕/极光）—— */
+  .mist{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(66% 34% at 50% 5%, rgba(183,228,199,.34), transparent 72%),
+      radial-gradient(44% 24% at 64% 16%, rgba(116,198,157,.20), transparent 74%);
+    animation:breathe 11s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.8}50%{opacity:1}}
+
+  /* —— 漂浮孢子/微萤（替代星星）—— */
+  .spore{position:absolute; width:3px; height:3px; border-radius:50%;
+    background:var(--mist); opacity:.5; box-shadow:0 0 6px rgba(149,213,178,.7);
+    animation:drift 14s ease-in-out infinite;}
+  .spore:nth-child(1){left:18%; top:20%; animation-delay:0s}
+  .spore:nth-child(2){left:74%; top:16%; animation-delay:3s; width:2px;height:2px}
+  .spore:nth-child(3){left:58%; top:26%; animation-delay:6s}
+  .spore:nth-child(4){left:30%; top:12%; animation-delay:9s; width:2px;height:2px}
+  @keyframes drift{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-14px);opacity:.7}}
+
+  /* —— 标题 —— */
+  .head{position:absolute; top:54px; width:100%; text-align:center; z-index:5;}
+  .title{font-weight:600; letter-spacing:.5em; padding-left:.5em; font-size:1.55rem;
+    color:#eafbf2; text-shadow:0 0 24px rgba(149,213,178,.45);}
+  .sub{margin-top:10px; color:var(--muted); font-size:.92rem; letter-spacing:.08em;}
+
+  /* ===================== 湖：上为森林剪影，下为倒影 ===================== */
+  .lake{position:absolute; left:0; right:0; top:286px; height:430px;}
+  .above,.below{position:absolute; left:0; right:0; height:184px;}
+  .above{top:0;}
+  .below{top:184px; transform:scaleY(-1);
+    opacity:.50; filter:blur(1.5px) brightness(.78) saturate(.98);
+    -webkit-mask:linear-gradient(to bottom,#000 0%, rgba(0,0,0,.22) 80%, transparent 100%);
+            mask:linear-gradient(to bottom,#000 0%, rgba(0,0,0,.22) 80%, transparent 100%);}
+
+  /* —— 水线 + 水面微光 —— */
+  .waterline{position:absolute; left:0; right:0; top:184px; height:2px;
+    background:linear-gradient(90deg, transparent, rgba(149,213,178,.50), transparent);}
+  .shimmer{position:absolute; left:0; right:0; top:186px; height:240px; pointer-events:none;
+    background:repeating-linear-gradient(0deg,
+      transparent 0 14px, rgba(149,213,178,.045) 14px 15px);
+    -webkit-mask:linear-gradient(to bottom,#000, transparent 92%);
+    animation:shimmer 9s linear infinite;}
+  @keyframes shimmer{0%{background-position-y:0}100%{background-position-y:30px}}
+
+  /* —— 萤火光柱（暖色倒影，替代月光倒影）—— */
+  .glowpath{position:absolute; left:48%; top:120px; transform:translateX(-50%);
+    width:24px; height:190px; border-radius:50%; filter:blur(6px); z-index:1;
+    background:linear-gradient(to bottom, rgba(233,196,106,.30), transparent 88%);}
+
+  /* ===================== 水面元素：同心涟漪 + 睡莲叶 ===================== */
+  .surface{position:absolute; left:0; right:0; top:184px; height:240px; pointer-events:none;}
+  /* 同心涟漪：扁椭圆（俯视水面透视），缓缓向外扩散 */
+  .ring{position:absolute; left:48%; top:46px; transform:translateX(-50%);
+    width:46px; height:15px; border:1px solid rgba(158,201,232,.45); border-radius:50%;
+    opacity:0; animation:rip 7s ease-out infinite;}
+  .ring:nth-child(2){animation-delay:2.3s}
+  .ring:nth-child(3){animation-delay:4.6s}
+  @keyframes rip{0%{transform:translateX(-50%) scale(.4); opacity:.6}
+                 100%{transform:translateX(-50%) scale(4.4); opacity:0}}
+  /* 睡莲叶：扁椭圆 + 一道缺口 */
+  .pad{position:absolute; border-radius:50%;
+    background:radial-gradient(circle at 42% 38%, var(--f-mid), var(--f-deep) 80%);
+    box-shadow:inset 0 1px 2px rgba(149,213,178,.18);
+    animation:bob 8s ease-in-out infinite;}
+  .pad::after{content:""; position:absolute; top:50%; left:50%; width:0; height:0;
+    border-left:6px solid transparent; border-right:6px solid transparent;
+    border-bottom:7px solid var(--water); transform:translate(-50%,-58%) rotate(18deg);}
+  .pad.p1{left:24%; top:78px; width:34px; height:13px}
+  .pad.p2{left:68%; top:104px; width:28px; height:11px; animation-delay:2s}
+  .pad.p3{left:50%; top:128px; width:22px; height:9px;  animation-delay:4s}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+  /* ===================== 几何松林（左亮右暗的双面，纪念碑谷"平面拼立体"）===================== */
+  .tree{position:absolute; bottom:0; transform-origin:bottom center;
+    clip-path:polygon(50% 0,62% 28%,56% 28%,72% 60%,63% 60%,82% 100%,18% 100%,37% 60%,28% 60%,44% 28%,38% 28%);
+    background:linear-gradient(101deg,
+      color-mix(in srgb, var(--g, var(--f-mid)) 100%, white 22%) 0 50%,
+      var(--g, var(--f-mid)) 50% 100%);
+  }
+  .tree::after{content:""; position:absolute; left:46%; bottom:-7px;
+    width:8%; height:9px; background:var(--f-deep);}
+
+  /* 萤火：暖色光点，缓慢上下浮 + 呼吸辉光 */
+  .firefly{position:absolute; width:11px; height:11px; border-radius:50%; z-index:2;
+    background:radial-gradient(circle at 40% 38%, #fff4d6, var(--accent) 60%, #c79b3e 100%);
+    box-shadow:0 0 16px 5px rgba(233,196,106,.6), 0 0 40px 14px rgba(233,196,106,.25);
+    animation:float 7s ease-in-out infinite, pulse 4s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @keyframes pulse{0%,100%{filter:brightness(.92)}50%{filter:brightness(1.18)}}
+
+  /* —— 底部说明 / 占位按钮（示意 splash 屏）—— */
+  .foot{position:absolute; bottom:34px; width:100%; text-align:center; z-index:5;}
+  .btn{display:inline-block; padding:14px 46px; border-radius:16px;
+    border:1px solid #2f6a51; background:rgba(18,53,42,.7); color:var(--text);
+    font-family:inherit; font-size:1rem; letter-spacing:.3em; padding-left:1.3em;
+    backdrop-filter:blur(3px);}
+  .tip{margin-top:14px; color:var(--muted); font-size:.82rem;}
+
+  /* —— 配色说明卡 —— */
+  .legend{color:var(--muted); font-family:ui-monospace,monospace; font-size:13px; line-height:1.9;}
+  .legend h3{color:var(--text); font-family:'Quicksand',sans-serif; margin-bottom:10px; font-weight:600;}
+  .sw{display:inline-block; width:30px; height:13px; border-radius:3px; vertical-align:middle; margin-right:8px;}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="mist"></div>
+    <span class="spore"></span><span class="spore"></span>
+    <span class="spore"></span><span class="spore"></span>
+
+    <div class="head">
+      <div class="title">MURMORA</div>
+      <div class="sub">夜林如墨　池塘倒映整片森林</div>
+    </div>
+
+    <div class="glowpath"></div>
+
+    <div class="lake">
+      <!-- 实景松林（无塔）-->
+      <div class="above">
+        <i class="tree" style="left:1%;  width:52px; height:104px; --g:var(--f-dark)"></i>
+        <i class="tree" style="left:14%; width:40px; height:80px;  --g:var(--f-deep)"></i>
+        <i class="tree" style="left:27%; width:58px; height:116px; --g:var(--f-mid)"></i>
+        <i class="tree" style="left:44%; width:46px; height:92px;  --g:var(--f-dark)"></i>
+        <i class="tree" style="left:60%; width:64px; height:128px; --g:var(--f-light)"></i>
+        <i class="tree" style="left:78%; width:44px; height:88px;  --g:var(--f-mid)"></i>
+        <i class="tree" style="left:89%; width:50px; height:100px; --g:var(--f-deep)"></i>
+        <div class="firefly" style="left:48%; bottom:132px"></div>
+      </div>
+      <!-- 倒影（同一松林，镜像+模糊+压暗）-->
+      <div class="below" aria-hidden="true">
+        <i class="tree" style="left:1%;  width:52px; height:104px; --g:var(--f-dark)"></i>
+        <i class="tree" style="left:14%; width:40px; height:80px;  --g:var(--f-deep)"></i>
+        <i class="tree" style="left:27%; width:58px; height:116px; --g:var(--f-mid)"></i>
+        <i class="tree" style="left:44%; width:46px; height:92px;  --g:var(--f-dark)"></i>
+        <i class="tree" style="left:60%; width:64px; height:128px; --g:var(--f-light)"></i>
+        <i class="tree" style="left:78%; width:44px; height:88px;  --g:var(--f-mid)"></i>
+        <i class="tree" style="left:89%; width:50px; height:100px; --g:var(--f-deep)"></i>
+        <div class="firefly" style="left:48%; bottom:132px"></div>
+      </div>
+
+      <div class="waterline"></div>
+      <div class="shimmer"></div>
+
+      <!-- 水面：同心涟漪 + 睡莲叶 -->
+      <div class="surface">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="pad p1"></div><div class="pad p2"></div><div class="pad p3"></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="btn">进　入</span>
+      <div class="tip">让每一个停不下来的念头，都有地方降落</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h3>森林池塘 · 暖萤火（提亮版）</h3>
+    <div><span class="sw" style="background:#163a2b"></span>#163a2b　暮林天空</div>
+    <div><span class="sw" style="background:#16402f"></span>#16402f　池水</div>
+    <div><span class="sw" style="background:#74c69d"></span>#74c69d　近林(亮面)</div>
+    <div><span class="sw" style="background:#40916c"></span>#40916c　中林</div>
+    <div><span class="sw" style="background:#2d6a4a"></span>#2d6a4a　远林(暗面)</div>
+    <div><span class="sw" style="background:#b7e4c7"></span>#b7e4c7　天光/雾</div>
+    <div><span class="sw" style="background:#e9c46a"></span>#e9c46a　萤火(唯一暖色)</div>
+    <div><span class="sw" style="background:#eaf6ef"></span>#eaf6ef　主文字</div>
+    <hr style="border-color:#234; margin:12px 0;">
+    <div style="max-width:235px; font-family:'Quicksand',sans-serif; line-height:1.7;">
+      已去掉塔 ✓<br>
+      几何松林沿岸 · 整片倒映入水<br>
+      水面同心涟漪轻轻扩散 · 几片睡莲叶<br>
+      一盏暖萤火低悬、倒映水中<br>
+      无月 · 无星 · 无塔
+    </div>
+  </div>
+
+</body>
+</html>
